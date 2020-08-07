@@ -1,0 +1,13 @@
+{
+    "name": "qoll",
+    "version": "0.0.1",
+    "main": "src/index.js",
+    "license": "MIT",
+    "description": "Node.JS thread pool.",
+    "author": "Mr.Panda <xivistudios@gmail.com> (https://github.com/quasipaa)",
+    "homepage": "https://github.com/quasipaa/Qoll",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/quasipaa/Qoll"
+    }
+}
