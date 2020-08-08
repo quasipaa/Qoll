@@ -9,5 +9,11 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/quasipaa/Qoll"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com/"
+    },
+    "dependencies": {
+        "@types/node": "^14.0.27"
     }
 }

@@ -1,17 +1,21 @@
-const {parentPort, workerData} = require("worker_threads")
+import {parentPort, workerData} from "worker_threads"
+import {Payload} from "./pool"
 
 /**
  * Future
  * @class
  */
-module.exports = class Future {
+export default class Future<T, U, R> {
+    private poll_handle: (param: Payload<U>) => Promise<R>
+    private init_handle: () => void
+    private data: T
     
     /**
      * @param {function} init 初始化函数
      * @param {function} poll 轮询函数
      * @constructor
      */
-    constructor(init, poll) {
+    constructor(init: Function, poll: Function) {
         this.data = workerData || {}
         this.init_handle = init.bind(this.data)
         this.poll_handle = poll.bind(this.data)
@@ -23,7 +27,7 @@ module.exports = class Future {
      * @returns {void}
      * @private
      */
-    init() {
+    private init(): void {
         const poll =  this.poll.bind(this)
         parentPort.on("message", poll) 
         this.init_handle()
@@ -31,17 +35,18 @@ module.exports = class Future {
     
     /**
      * 发送消息到管道
-     * @param {number} uid 任务ID
+     * @param {string} uid 任务ID
      * @param {Error} reject? 错误
      * @param {any} resolve? 返回数据
      * @returns {void}
      * @private
      */
-    emit(uid, reject = {}, resolve) {
+    private emit(uid: string, resolve: R, reject?: Error): void {
+        const error = reject ? reject.message : undefined
         parentPort.postMessage({
-            reject: reject.message,
-            ___uid: uid,
-            resolve
+            reject: error,
+            resolve,
+            uid
         })
     }
     
@@ -51,10 +56,10 @@ module.exports = class Future {
      * @returns {void}
      * @private
      */
-    poll(payload) {
-        const uid = payload.___uid
+    private poll(payload: Payload<U>): void {
+        const uid = payload.uid
         this.poll_handle(payload)
-            .then(x => this.emit(uid, undefined, x))
-            .catch(x => this.emit(uid, x))
+            .then(x => this.emit(uid, x))
+            .catch(x => this.emit(uid, undefined, x))
     }
 }

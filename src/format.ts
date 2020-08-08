@@ -6,7 +6,7 @@
  * @returns {string}
  * @private
  */
-function replace(source) {
+function replace(source: string): string {
     if (source.search(/function/) === 0) return source.replace(/function/, "async function")
     if (source.search(/async poll/) === 0) return source.replace(/async poll/, "async function")
     if (source.search(/async init/) === 0) return source.replace(/async init/, "async function")
@@ -23,7 +23,7 @@ function replace(source) {
  * @returns {string}
  * @public
  */
-module.exports = function(init, poll) {
+export default function(init: Function, poll: Function): string {
     return [
         "const Future = require(\"",
         __dirname.replace(/\\/g, "/"),

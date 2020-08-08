@@ -1,4 +1,4 @@
-const {spawn} = require("../src")
+import {spawn} from "../src"
 
 // 创建线程池
 const threads = spawn({
@@ -7,6 +7,10 @@ const threads = spawn({
      * 数据缓存
      * 作为初始化数据传入线程
      * 每个线程都是独立非共享数据
+     * 
+     * 如果需要共享数据
+     * 可以使用跨线程锁
+     * 使用Mutex标记
      */
     data: {
         index: 0
@@ -18,7 +22,7 @@ const threads = spawn({
      * 这里添加sleep函数到this上面
      */
     init() {
-        this.sleep = (timeout) => {
+        this.sleep = (timeout: number) => {
             return new Promise(resolve => {
                 setTimeout(resolve, timeout)
             })
