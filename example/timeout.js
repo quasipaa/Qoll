@@ -1,4 +1,4 @@
-import {spawn} from "../src"
+const {spawn} = require("../src")
 
 // 创建线程池
 const threads = spawn({
