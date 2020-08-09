@@ -63,7 +63,7 @@ const threads = Runtime.spawn(DefaultPools, {
         await this.sleep(2000)
         let { sum } = await this.mutex.lock()
         await this.mutex.unlock({ sum: sum + param.number })
-        this.index += param.index
+        this.data.index += param.index
         return {
             index: this.index,
             sum
