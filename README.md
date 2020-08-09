@@ -4,7 +4,7 @@ This is a very lightweight Node.JS thread pool library with no dependencies and 
 This library minimizes the complexity of creating thread pools and makes multithreaded programming easier and more user-friendly.
 
 ### Version
-0.0.1
+0.0.2
 
 
 ### Overview
