@@ -8,9 +8,9 @@ This library minimizes the complexity of creating thread pools and makes multith
 
 
 #### Overview
-- The function is converted to a string, passed in as an eval string to a child thread, and then a thread pool is created based on the specified number of threads, which the user can define or default to CPU threads if not defined, and the data is passed in through `workerData` to the child thread.
-- Whenever a user wakes up a thread, the `poll` function is called and the result is returned to the caller of `wake`.
-- When a task enters the thread pool, the behavior of scheduling is that if there are free threads, the task is assigned to the free thread. If there are no free threads in the thread pool, the task is put in a wait queue, waiting for the thread pool to be free and then assigned to the free thread pool again.
+The function is converted to a string, passed in as an eval string to a child thread, and then a thread pool is created based on the specified number of threads, which the user can define or default to CPU threads if not defined, and the data is passed in through `workerData` to the child thread.</br>
+Whenever a user wakes up a thread, the `poll` function is called and the result is returned to the caller of `wake`.</br>
+When a task enters the thread pool, the behavior of scheduling is that if there are free threads, the task is assigned to the free thread. If there are no free threads in the thread pool, the task is put in a wait queue, waiting for the thread pool to be free and then assigned to the free thread pool again.
 
 
 #### Example
