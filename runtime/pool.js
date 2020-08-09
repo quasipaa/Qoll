@@ -12,7 +12,6 @@
 const { Worker } = require("worker_threads")
 const MutexMaster = require("../mutex/master")
 const Channel = require("../channel.js")
-const { cpus } = require("os")
 
 /**
  * 线程池
@@ -21,18 +20,17 @@ const { cpus } = require("os")
 module.exports = class Pool {
 
     /**
-     * @param {object} mutex? 跨线程
-     * @param {object} data? 数据
+     * @param {object} [mutex?] 跨线程
+     * @param {object} [data?] 独立数据
      * @param {string} context 句柄字符串
-     * @param {number} [option.workers?] 启动线程数
+     * @param {number} pools 启动线程数
      * @constructor
      */
-    constructor(mutex, data, context, option) {
+    constructor({ mutex, data }, context, pools) {
         this.index = 0
         this.pool = []
         this.queue = {}
-        this.option = option
-        this.size = option.workers || cpus().length
+        this.size = pools
         this.mutex = new MutexMaster(mutex || {})
         this.initialize(data || {}, context)
     }

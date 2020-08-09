@@ -1,7 +1,7 @@
-const {Runtime} = require("../")
+const {Runtime, DefaultPools} = require("../")
 
 // 创建线程池
-const threads = Runtime.spawn({
+const threads = Runtime.spawn(DefaultPools, {
     
     // 跨线程数据
     mutex: {

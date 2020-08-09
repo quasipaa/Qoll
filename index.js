@@ -12,4 +12,7 @@
 
 "use strict"
 
+const { cpus } = require("os")
+
+exports.DefaultPools = cpus().length
 exports.Runtime = require("./runtime")

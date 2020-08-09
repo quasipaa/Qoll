@@ -17,10 +17,10 @@ This library minimizes the complexity of creating thread pools and makes multith
 > The way the library works depends on serializing the function to a string and then transferring it to a child thread, so the scope of the child thread function is completely isolated and the function cannot access the outside of the scope.
 
 ```js
-const {Runtime} = require("qoll")
+const {Runtime, DefaultPools} = require("qoll")
 
 // Create thread pools
-const threads = Runtime.spawn({
+const threads = Runtime.spawn(DefaultPools, {
     
     // Sharing data across threads
     mutex: {
