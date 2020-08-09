@@ -24,5 +24,5 @@ const Pool = require("./pool.js")
  */
 exports.spawn = function(pools, task) {
     const source = format(task.initialize, task.poll)
-    return new Pool(task, task, source, pools)
+    return new Pool(task, source, pools)
 }

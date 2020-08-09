@@ -15,7 +15,7 @@
 module.exports = class Worker {
     constructor() {
         this.listener = null
-        this.callback = null
+        this.handle = null
     }
     
     /**
@@ -27,8 +27,8 @@ module.exports = class Worker {
      */
     message({ reject, resolve }) {
         reject ? 
-            this.callback.reject(new Error(reject)) : 
-            this.callback.resolve(resolve)
+            this.handle.reject(new Error(reject)) : 
+            this.handle.resolve(resolve)
     }
     
     /**
@@ -49,7 +49,7 @@ module.exports = class Worker {
      */
     async unlock(value) {
         return new Promise((resolve, reject) => {
-            this.callback = { resolve, reject }
+            this.handle = { resolve, reject }
             this.listener({ type: "unlock", value })
         })
     }
@@ -61,7 +61,7 @@ module.exports = class Worker {
      */
     lock() {
         return new Promise((resolve, reject) => {
-            this.callback = { resolve, reject }
+            this.handle = { resolve, reject }
             this.listener({ type: "lock" })
         })
     }

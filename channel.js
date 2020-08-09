@@ -20,7 +20,6 @@ module.exports = class Channel {
      * @constructor
      */
     constructor(port) {
-        super()
         this.listener = {}
         this.context = port
         this.message()
