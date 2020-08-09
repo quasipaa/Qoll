@@ -1,28 +1,27 @@
-const {spawn} = require("../src")
+const {Runtime} = require("../")
 
 // 创建线程池
-const threads = spawn({
+const threads = Runtime.spawn({
+    
+    // 跨线程数据
+    mutex: {
+        sum: 0
+    },
     
     /**
-     * 数据缓存
      * 作为初始化数据传入线程
      * 每个线程都是独立非共享数据
-     * 
-     * 如果需要共享数据
-     * 可以使用跨线程锁
-     * 使用Mutex标记
      */
     data: {
         index: 0
     },
     
     /**
-     * 线程创建时调用
-     * this为数据缓存
+     * 线程创建时调用, this为内部data
      * 这里添加sleep函数到this上面
      */
-    init() {
-        this.sleep = (timeout: number) => {
+    initialize() {
+        this.sleep = function(timeout) {
             return new Promise(resolve => {
                 setTimeout(resolve, timeout)
             })
@@ -30,15 +29,19 @@ const threads = spawn({
     },
     
     /**
-     * 每次执行任务时调用
-     * this为数据缓存
+     * 每次执行任务时调用, this为内部data
      * 这里对于每次调用传入的参数都附加到
      * 内部的数据缓存上面并返回this的index
      */
     async poll(param) {
         await this.sleep(2000)
+        let { sum } = await this.mutex.lock()
+        await this.mutex.unlock({ sum: sum + param.number })
         this.index += param.index
-        return this.index
+        return {
+            index: this.index,
+            sum
+        }
     }
 })
 
@@ -47,5 +50,7 @@ const threads = spawn({
  * 将每次返回的数据打印出来
  */
 for (let index = 0; index < 99; index ++) {
-    threads.wake({index}).then(console.log)  
+    threads
+        .wake({index, number: 1})
+        .then(console.log)  
 }

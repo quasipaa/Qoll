@@ -6,10 +6,10 @@
  */
 const REPLACE_TEMPLATE = [
     [/async poll/, "async function"],
-    [/async init/, "async function"],
+    [/async initialize/, "async function"],
+    [/initialize/, "async function"],
     [/function/, "async function"],
     [/poll/, "async function"],
-    [/init/, "async function"],
     [/\(/, "async ("]
 ]
 

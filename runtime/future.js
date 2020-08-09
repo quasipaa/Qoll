@@ -1,5 +1,7 @@
-const { parentPort, workerData } = require("worker_threads")
-const Channel = require("./channel.js")
+const { parentPort, workerData = {} } = require("worker_threads")
+const MutexWorker = require("../mutex/worker.js")
+const Channel = require("../channel.js")
+const mutex = new MutexWorker()
 
 /**
  * Future
@@ -14,9 +16,22 @@ module.exports = class Future extends Channel {
      */
     constructor(initialize, poll) {
         super(parentPort)
-        this.data = workerData || {} 
+        this.mutex = mutex
+        this.data = { ...workerData, mutex }
         this.handle = poll.bind(this.data)
+        this.initialize(initialize)
+    }
+    
+    /**
+     * 初始化
+     * @param {function} initialize 初始化函数
+     * @returns {void}
+     * @private
+     */
+    initialize(initialize) {
         this.on("___rpc", this.poll.bind(this))
+        this.on("___mutex", v => this.mutex.message(v))
+        this.mutex.bind(v => this.emit("___mutex", v))
         initialize.bind(this.data)()
     }
 

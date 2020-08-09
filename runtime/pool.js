@@ -1,6 +1,7 @@
 const { Worker } = require("worker_threads")
+const MutexCore = require("../mutex/core")
 const cpus = require("os").cpus().length
-const Channel = require("./channel.js")
+const Channel = require("../channel.js")
 
 /**
  * 线程池
@@ -9,30 +10,45 @@ const Channel = require("./channel.js")
 module.exports = class Pool {
 
     /**
-    * @param {object} data? 数据
-    * @param {string} context 句柄字符串
-    * @param {number} [option.workers?] 启动线程数
-    * @constructor
-    */
-    constructor(data, context, option) {
+     * @param {object} mutex? 跨线程
+     * @param {object} data? 数据
+     * @param {string} context 句柄字符串
+     * @param {number} [option.workers?] 启动线程数
+     * @constructor
+     */
+    constructor(mutex, data, context, option) {
         this.index = 0
         this.pool = []
         this.queue = {}
         this.option = option
         this.size = option.workers || cpus
+        this.mutex = new MutexCore(mutex || {})
         this.initialize(data || {}, context)
     }
 
     /**
-    * 初始化
-    * @param {object} workerData 数据
-    * @param {string} context 句柄字符串
-    * @returns {void}
-    * @private
-    */
+     * 初始化
+     * @param {object} workerData 数据
+     * @param {string} context 句柄字符串
+     * @returns {void}
+     * @private
+     */
     initialize(workerData, context) {
         this.initialize_pool(workerData, context)
         this.pool.forEach(this.bind_message.bind(this))
+        this.mutex.callback(this.bind_mutex.bind(this))
+    }
+    
+    /**
+     * 绑定跨线程锁消息
+     * @param {number} index 索引
+     * @param {any} value 消息
+     * @returns {void}
+     * @private
+     */
+    bind_mutex(index, value) {
+        const { worker } = this.pool[index]
+        worker.emit("___mutex", value)
     }
   
     /**
@@ -44,9 +60,9 @@ module.exports = class Pool {
      */
     initialize_pool(workerData, context) {
         this.pool = new Array(this.size).fill(null)
-            .map(() => new Worker(context, { workerData, eval: true }))
-            .map((worker, index) => ({ index, worker, done: true }))
-            .map(x => ({ ...x, worker: new Channel(x.worker) }))
+        .map(() => new Worker(context, { workerData, eval: true }))
+        .map((worker, index) => ({ index, worker, done: true }))
+        .map(x => ({ ...x, worker: new Channel(x.worker) }))
     }
     
     /**
@@ -58,6 +74,7 @@ module.exports = class Pool {
      */
     bind_message({ worker }, i) {
         worker.on("___rpc", v => this.watch(i, v))
+        worker.on("___mutex", v => this.mutex.message(v, i))
     }
     
     /**
@@ -96,10 +113,10 @@ module.exports = class Pool {
     }
 
     /**
-    * 队列更新
-    * @returns {void}
-    * @private
-    */
+     * 队列更新
+     * @returns {void}
+     * @private
+     */
     async update() {
         await undefined
         const free = this.frees()
@@ -109,10 +126,10 @@ module.exports = class Pool {
     }
 
     /**
-    * uid
-    * @returns {string}
-    * @private
-    */
+     * uid
+     * @returns {string}
+     * @private
+     */
     uid() {
         const target = this.index + 1
         this.index = target == Number.MAX_VALUE ? 0 : target
@@ -120,18 +137,18 @@ module.exports = class Pool {
     }
 
     /**
-    * 响应监听
-    * @param {number} index 索引
-    * @param {any} response 响应
-    * @returns {void}
-    * @private
-    */
-    watch(index, response) {
+     * 响应监听
+     * @param {number} index 索引
+     * @param {any} result 响应
+     * @returns {void}
+     * @private
+     */
+    watch(index, result) {
         this.pool[index].done = true
-        const { reject, resolve } = this.queue[response.uid]
-        response.reject && reject(new Error(response.reject))
-        response.resolve && resolve(response.resolve)
-        delete this.queue[response.uid]
+        const is_error = typeof result.reject === "string"
+        const { reject, resolve } = this.queue[result.uid]
+        is_error ? reject(new Error(result.reject)) : resolve(result.resolve)
+        delete this.queue[result.uid]
         this.update()
     }
     
@@ -149,11 +166,11 @@ module.exports = class Pool {
     }
 
     /**
-    * 唤醒线程
-    * @param {any} payload 负载
-    * @returns {Promose<any>} 
-    * @public
-    */
+     * 唤醒线程
+     * @param {any} payload 负载
+     * @returns {Promose<any>} 
+     * @public
+     */
     wake(payload) {
         return new Promise((resolve, reject) => {
             this.task(payload, resolve, reject)
