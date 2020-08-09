@@ -1,8 +1,15 @@
+/*!
+ * 跨线程锁（子线程）
+ * mutex/worker.js
+ * Copyright (c) 2020 Mr.Panda.
+ * 
+ * 管理锁的请求以及释放.
+ */
+
 "use strict"
 
 /**
  * 跨线程锁
- * 工作线程
  * @class
  */
 module.exports = class Worker {
@@ -30,7 +37,7 @@ module.exports = class Worker {
      * @returns {void}
      * @public
      */
-    bind(handle) {
+    callback(handle) {
         this.listener = handle
     }
     

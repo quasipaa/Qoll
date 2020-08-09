@@ -1,3 +1,14 @@
+/*!
+ * 运行时
+ * runtime/index.js
+ * Copyright (c) 2020 Mr.Panda.
+ * 
+ * 线程池运行时，
+ * 创建和管理整个线程池.
+ */
+
+"use strict"
+
 const format = require("./format.js")
 const Pool = require("./pool.js")
 

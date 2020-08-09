@@ -1,3 +1,12 @@
+/*!
+ * 格式化
+ * runtime/format.js
+ * Copyright (c) 2020 Mr.Panda.
+ * 
+ * 将关键函数转为字符串,
+ * 组合成可以运行的单模块源代码.
+ */
+
 "use strict"
 
 /**
@@ -15,6 +24,8 @@ const REPLACE_TEMPLATE = [
 
 /**
  * 规范写法
+ * 通过将各种写法转为标准写法,
+ * 使其可以作为函数参数传入Future类.
  * @param {string} source 源文本
  * @returns {string}
  * @private

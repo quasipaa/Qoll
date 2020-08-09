@@ -1,10 +1,19 @@
-const { EventEmitter } = require("events")
+/*!
+ * 抽象管道模块
+ * channel.js
+ * Copyright (c) 2020 Mr.Panda.
+ * 
+ * 将进程消息管道抽象为事件驱动模式,
+ * 通过传入进程消息管道来创建实例.
+ */
+
+"use strict"
 
 /**
  * 管道类
  * @class
  */
-module.exports = class Channel extends EventEmitter {
+module.exports = class Channel {
     
     /**
      * @param {MessagePort} port 消息端口

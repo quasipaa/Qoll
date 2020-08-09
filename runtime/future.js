@@ -1,3 +1,14 @@
+/*!
+ * 子线程包装
+ * runtime/future.js
+ * Copyright (c) 2020 Mr.Panda.
+ * 
+ * 子线程循环运行时,
+ * 管理子线程的任务执行和与主线程之间的通信.
+ */
+
+"use strict"
+
 const { parentPort, workerData = {} } = require("worker_threads")
 const MutexWorker = require("../mutex/worker.js")
 const Channel = require("../channel.js")
@@ -18,21 +29,21 @@ module.exports = class Future extends Channel {
         super(parentPort)
         this.mutex = mutex
         this.data = { ...workerData, mutex }
-        this.handle = poll.bind(this.data)
-        this.initialize(initialize)
+        this.poll_handle = poll.bind(this.data)
+        this.initialize_handle = initialize.bind(this.data)
+        this.initialize()
     }
     
     /**
      * 初始化
-     * @param {function} initialize 初始化函数
      * @returns {void}
      * @private
      */
-    initialize(initialize) {
+    initialize() {
         this.on("___rpc", this.poll.bind(this))
         this.on("___mutex", v => this.mutex.message(v))
-        this.mutex.bind(v => this.emit("___mutex", v))
-        initialize.bind(this.data)()
+        this.mutex.callback(v => this.emit("___mutex", v))
+        this.initialize_handle()
     }
 
     /**
@@ -58,7 +69,7 @@ module.exports = class Future extends Channel {
      * @private
      */
     poll({ payload, uid }) {
-        this.handle(payload)
+        this.poll_handle(payload)
             .then(x => this.send(uid, undefined, x))
             .catch(x => this.send(uid, x))
     }

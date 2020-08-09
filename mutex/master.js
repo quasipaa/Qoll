@@ -1,3 +1,12 @@
+/*!
+ * 跨线程锁（主线程）
+ * mutex/master.js
+ * Copyright (c) 2020 Mr.Panda.
+ * 
+ * 管理锁动作的调度,
+ * 以及有锁数据的原子操作.
+ */
+
 "use strict"
 
 /**

@@ -1,7 +1,18 @@
+/*!
+ * 线程池
+ * runtime/pool.js
+ * Copyright (c) 2020 Mr.Panda.
+ * 
+ * 管理线程池的调度,
+ * 以及与每个子线程之间的通信.
+ */
+
+"use strict"
+
 const { Worker } = require("worker_threads")
-const MutexCore = require("../mutex/core")
-const cpus = require("os").cpus().length
+const MutexMaster = require("../mutex/master")
 const Channel = require("../channel.js")
+const { cpus } = require("os")
 
 /**
  * 线程池
@@ -21,8 +32,8 @@ module.exports = class Pool {
         this.pool = []
         this.queue = {}
         this.option = option
-        this.size = option.workers || cpus
-        this.mutex = new MutexCore(mutex || {})
+        this.size = option.workers || cpus().length
+        this.mutex = new MutexMaster(mutex || {})
         this.initialize(data || {}, context)
     }
 
@@ -38,6 +49,20 @@ module.exports = class Pool {
         this.pool.forEach(this.bind_message.bind(this))
         this.mutex.callback(this.bind_mutex.bind(this))
     }
+  
+    /**
+     * 初始化线程池
+     * @param {object} workerData 数据
+     * @param {string} context 句柄字符串
+     * @returns {void}
+     * @private
+     */
+    initialize_pool(workerData, context) {
+        this.pool = new Array(this.size).fill(null)
+            .map(() => new Worker(context, { workerData, eval: true }))
+            .map((worker, index) => ({ index, worker, done: true }))
+            .map(x => ({ ...x, worker: new Channel(x.worker) }))
+    }
     
     /**
      * 绑定跨线程锁消息
@@ -49,20 +74,6 @@ module.exports = class Pool {
     bind_mutex(index, value) {
         const { worker } = this.pool[index]
         worker.emit("___mutex", value)
-    }
-  
-    /**
-     * 初始化线程池
-     * @param {object} workerData 数据
-     * @param {string} context 句柄字符串
-     * @returns {void}
-     * @private
-     */
-    initialize_pool(workerData, context) {
-        this.pool = new Array(this.size).fill(null)
-        .map(() => new Worker(context, { workerData, eval: true }))
-        .map((worker, index) => ({ index, worker, done: true }))
-        .map(x => ({ ...x, worker: new Channel(x.worker) }))
     }
     
     /**
