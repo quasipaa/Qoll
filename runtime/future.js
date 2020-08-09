@@ -28,9 +28,9 @@ module.exports = class Future extends Channel {
     constructor(initialize, poll) {
         super(parentPort)
         this.mutex = mutex
-        this.data = { ...workerData, mutex }
-        this.poll_handle = poll.bind(this.data)
-        this.initialize_handle = initialize.bind(this.data)
+        this.context = { data: workerData, mutex }
+        this.poll_handle = poll.bind(this.context)
+        this.initialize_handle = initialize.bind(this.context)
         this.initialize()
     }
     
